@@ -160,8 +160,6 @@ table(device_usage_data$`User Behavior Class`, device_usage_data$`Operating Syst
 Now lets take a look at some five number summaries for quantitative variables at levels of `User Behavior Class` as well as `Gender`, `Device Model`, and `Operating System`.
 
 ```{r}
-### KEY NUMERICAL SUMMARIES
-
 # Age across Behavior Class (shows age patterns by usage level)
 cat("Age by User Behavior Class:\n")
 tapply(device_usage_data$Age, device_usage_data$`User Behavior Class`, summary)
@@ -195,5 +193,165 @@ tapply(device_usage_data$`Screen On Time (hours/day)`,
 cat("Screen On Time by Operating System:\n")
 tapply(device_usage_data$`Screen On Time (hours/day)`, 
        device_usage_data$`Operating System`, summary)
+```
+
+Now lets do the same, but instead look at their means and standard deviations. First we have to create our own function that will output only mean and standard deviations. 
+
+```{r}
+mean_sd_function <- function(x){
+  mean_val <- mean(x, na.rm = TRUE)
+  sd_val <- sd(x, na.rm = TRUE)
+  return(c(Mean = mean_val, `Std Dev` = sd_val))
+}
+```
+
+Now apply this function to the previous `tapply()` calls we ran:
+
+```{r}
+# Age across Behavior Class (shows age patterns by usage level)
+cat("Age by User Behavior Class:\n")
+tapply(device_usage_data$Age, device_usage_data$`User Behavior Class`, mean_sd_function)
+
+# Screen Time across Behavior Class (validates the grouping)
+cat("Screen On Time by User Behavior Class:\n")
+tapply(device_usage_data$`Screen On Time (hours/day)`, 
+       device_usage_data$`User Behavior Class`, mean_sd_function)
+
+# App Usage across Behavior Class (validates the grouping)
+cat("App Usage Time by User Behavior Class:\n")
+tapply(device_usage_data$`App Usage Time (min/day)`, 
+       device_usage_data$`User Behavior Class`, mean_sd_function)
+
+# Battery Drain across Behavior Class (validates the grouping)
+cat("Battery Drain by User Behavior Class:\n")
+tapply(device_usage_data$`Battery Drain (mAh/day)`, 
+       device_usage_data$`User Behavior Class`, mean_sd_function)
+
+# Screen Time across Gender (gender differences in usage)
+cat("Screen On Time by Gender:\n")
+tapply(device_usage_data$`Screen On Time (hours/day)`, 
+       device_usage_data$Gender, mean_sd_function)
+
+# Screen Time across Device Model (device differences)
+cat("Screen On Time by Device Model:\n")
+tapply(device_usage_data$`Screen On Time (hours/day)`, 
+       device_usage_data$`Device Model`, mean_sd_function)
+
+# Screen Time across Operating System (iOS vs Android)
+cat("Screen On Time by Operating System:\n")
+tapply(device_usage_data$`Screen On Time (hours/day)`, 
+       device_usage_data$`Operating System`, mean_sd_function)
+```
+
+### Plots 
+
+```{r}
+# Histogram of Screen Time
+ggplot(device_usage_data, aes(x = `Screen On Time (hours/day)`)) +
+  geom_histogram(binwidth = 0.5, fill = "steelblue", color = "black", alpha = .8) +
+  geom_vline(aes(xintercept = mean(`Screen On Time (hours/day)`)), 
+             color = "red", linetype = "dashed", linewidth = 1) +  # include a line representing the mean
+  labs(title = "Distribution of Screen On Time",
+       subtitle = paste("Mean =", round(mean(device_usage_data$`Screen On Time (hours/day)`), 2), "hours"),
+       x = "Screen On Time (hours/day)",
+       y = "Count of Users") +
+  theme_minimal()
+```
+
+```{r}
+# Plot 2: Bar Chart of User Behavior Class
+ggplot(device_usage_data, aes(x = as.factor(`User Behavior Class`), fill = as.factor(`User Behavior Class`))) +
+  geom_bar() +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 4) +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Distribution of User Behavior Classes",
+       subtitle = "1 = Lightest Users, 5 = Heaviest Users",
+       x = "User Behavior Class",
+       y = "Count of Users",
+       fill = "Behavior Class") +
+  theme_minimal()
+```
+
+
+```{r}
+# Plot 3: Box Plot of Screen Time by Behavior Class
+ggplot(device_usage_data, aes(x = as.factor(`User Behavior Class`), 
+                              y = `Screen On Time (hours/day)`,
+                              fill = as.factor(`User Behavior Class`))) +
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 19, size = 1, color = "red") +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "Screen On Time by User Behavior Class",
+       subtitle = "Box plots showing distribution across usage levels (red dot = mean)",
+       x = "User Behavior Class",
+       y = "Screen On Time (hours/day)",
+       fill = "Behavior Class") +
+  theme_minimal()
+```
+
+
+```{r message = FALSE}
+# Plot 4: Scatter Plot of App Usage vs Battery Drain
+ggplot(device_usage_data, aes(x = `App Usage Time (min/day)`, 
+                              y = `Battery Drain (mAh/day)`,
+                              color = as.factor(`User Behavior Class`))) +
+  geom_point(alpha = 0.8, size = 1.5) +
+  geom_smooth(method = "lm", se = FALSE, alpha = 0.2) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(title = "App Usage vs Battery Drain by Behavior Class",
+       subtitle = "Positive correlation with clear separation by behavior class",
+       x = "App Usage Time (min/day)",
+       y = "Battery Drain (mAh/day)",
+       color = "Behavior Class") +
+  theme_minimal()
+```
+
+
+```{r}
+# Plot 5: Side-by-Side Bar Chart of Behavior Class by Device Model
+ggplot(device_usage_data, aes(x = `Device Model`, 
+                              fill = as.factor(`User Behavior Class`))) +
+  geom_bar(position = "dodge") +
+  scale_fill_brewer(palette = "Blues") +
+  labs(title = "User Behavior Class Distribution by Device Model",
+       subtitle = "Comparison of usage patterns across different devices",
+       x = "Device Model",
+       y = "Count of Users",
+       fill = "Behavior Class") +
+  theme_minimal()
+```
+
+
+```{r}
+# Plot 6: Faceted Histograms of Screen Time by Device Model
+ggplot(device_usage_data, aes(x = `Screen On Time (hours/day)`, 
+                              fill = `Device Model`)) +
+  geom_histogram(binwidth = 0.5, color = "white", alpha = 0.7) +
+  facet_wrap(~`Device Model`, ncol = 3, scales = "free_y") +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(title = "Screen On Time Distribution by Device Model",
+       subtitle = "Faceted histograms showing usage patterns for each device",
+       x = "Screen On Time (hours/day)",
+       y = "Count of Users") +
+  theme_minimal()
+```
+
+
+
+```{r}
+# Plot 7: Violin + Box Plot
+ggplot(device_usage_data, aes(x = as.factor(`User Behavior Class`), 
+                              y = `App Usage Time (min/day)`,
+                              fill = as.factor(`User Behavior Class`))) +
+  geom_violin(alpha = 0.6, trim = FALSE) +
+  geom_boxplot(width = 0.15, fill = "white", alpha = 0.8) +
+  stat_summary(fun = mean, geom = "point", shape = 19, size = 1, color = "red") +
+  scale_fill_brewer(palette = "RdYlBu") +
+  labs(title = "App Usage Distribution by Behavior Class",
+       subtitle = "Violin plots show density shape, box plots show summary statistics (red dot = mean)",
+       x = "User Behavior Class",
+       y = "App Usage Time (min/day)") +
+  theme_minimal() +
+  theme(legend.position = "none")
 ```
 
