@@ -1,0 +1,199 @@
+---
+title: "static"
+format: html
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+library(tidyverse)
+library(tibble)
+```
+
+
+# Reading in the Data
+
+For this project, I will be using the [Mobile Device Usage](https://www.kaggle.com/datasets/valakhorasani/mobile-device-usage-and-user-behavior-dataset) data set. Lets read in our data.
+
+```{r}
+device_usage_data <- read_csv("user_behavior_dataset.csv")
+
+# Lets take a glance at our data set
+head(device_usage_data)
+#str(device_usage_data)  # uncomment if you'd like to take a closer look at the variables
+```
+
+### Data Set Description
+
+This dataset provides a comprehensive analysis of mobile device usage patterns and user behavior classification. It contains 700 samples of user data, including metrics such as app usage time, screen-on time, battery drain, and data consumption. Each entry is categorized into one of five `user behavior classes`, ranging from light to extreme usage (1 to 5). Light usage ranges from 0-2 hours of `Screen On Time`, while extreme usage corresponds to 8 or more hours of `Screen On Time`.
+
+Key Features:
+
+- User ID: Unique identifier for each user.
+
+- Device Model: Model of the user's smartphone.
+
+- Operating System: The OS of the device (iOS or Android).
+
+- App Usage Time: Daily time spent on mobile applications, measured in minutes.
+
+- Screen On Time: Average hours per day the screen is active.
+
+- Battery Drain: Daily battery consumption in mAh.
+
+- Number of Apps Installed: Total apps available on the device.
+
+- Data Usage: Daily mobile data consumption in megabytes.
+
+- Age: Age of the user.
+
+- Gender: Gender of the user (Male or Female).
+
+- User Behavior Class: Classification of user behavior based on usage patterns (1 to 5).
+
+### Manipulating the data
+
+In order to get more meaningful results from our tables and charts in the next section, lets  and put certain data in groups, such as `Screen On Time`. That way, when looking at a contingency table, for example, we won't have an overwhelming amount of categories. Instead, we'll group them within ranges of 0-2, 2-4, 4-6, ..., 10-12 (measured in hours). We'll do the same for `Age`, `App Usage Time`, and `Battery Drain` (with different groupings). Then we'll turn them to factors for better plotting. Note that I had to look up the `case_when()` function to create these groupings. 
+
+```{r}
+device_usage_data <- device_usage_data %>%
+  # Screen On Time Groups (hours) - Combined Very Heavy & Extreme
+  mutate(
+    # Age Groups (5 levels)
+    Age_Group = case_when(
+      Age < 25   ~ "Young (18-24)",
+      Age < 35   ~ "Young Adult (25-34)",
+      Age < 45   ~ "Middle Adult (35-44)",
+      Age < 55   ~ "Older Adult (45-54)",
+      Age >= 55  ~ "Senior (55-59)"
+    ),
+    
+    Screen_Time_Group = case_when(
+      `Screen On Time (hours/day)` < 2        ~ "Very Light (0-2h)",
+      `Screen On Time (hours/day)` < 4        ~ "Light (2-4h)",
+      `Screen On Time (hours/day)` < 6        ~ "Moderate (4-6h)",
+      `Screen On Time (hours/day)` < 8        ~ "Heavy (6-8h)",
+      `Screen On Time (hours/day)` >= 8       ~ "Very Heavy/Extreme (8-12h)"  # Combined!
+    ),
+    
+    # App Usage Time Groups (minutes)
+    App_Usage_Group = case_when(
+      `App Usage Time (min/day)` < 100        ~ "Very Light (0-100m)",
+      `App Usage Time (min/day)` < 200        ~ "Light (100-200m)",
+      `App Usage Time (min/day)` < 300        ~ "Moderate (200-300m)",
+      `App Usage Time (min/day)` < 400        ~ "Heavy (300-400m)",
+      `App Usage Time (min/day)` < 500        ~ "Very Heavy (400-500m)",
+      `App Usage Time (min/day)` <= 600       ~ "Extreme (500-600m)"
+    ),
+    
+    # Battery Drain Groups (mAh)
+    Battery_Group = case_when(
+      `Battery Drain (mAh/day)` < 500         ~ "Very Low (0-500mAh)",
+      `Battery Drain (mAh/day)` < 1000        ~ "Low (500-1000mAh)",
+      `Battery Drain (mAh/day)` < 1500        ~ "Moderate (1000-1500mAh)",
+      `Battery Drain (mAh/day)` < 2000        ~ "Heavy (1500-2000mAh)",
+      `Battery Drain (mAh/day)` < 2500        ~ "Very Heavy (2000-2500mAh)",
+      `Battery Drain (mAh/day)` <= 3000       ~ "Extreme (2500-3000mAh)"
+    ),
+    
+    # Convert to ordered factors for better plotting
+    Age_Group = factor(Age_Group, 
+                       levels = c("Young (18-24)", "Young Adult (25-34)", 
+                                  "Middle Adult (35-44)", "Older Adult (45-54)", 
+                                  "Senior (55-59)")),
+    
+    Screen_Time_Group = factor(Screen_Time_Group, 
+                               levels = c("Very Light (0-2h)", "Light (2-4h)", 
+                                          "Moderate (4-6h)", "Heavy (6-8h)", 
+                                          "Very Heavy/Extreme (8-12h)")), 
+    
+    App_Usage_Group = factor(App_Usage_Group,
+                             levels = c("Very Light (0-100m)", "Light (100-200m)",
+                                        "Moderate (200-300m)", "Heavy (300-400m)",
+                                        "Very Heavy (400-500m)", "Extreme (500-600m)")),
+    
+    Battery_Group = factor(Battery_Group,
+                           levels = c("Very Low (0-500mAh)", "Low (500-1000mAh)",
+                                      "Moderate (1000-1500mAh)", "Heavy (1500-2000mAh)",
+                                      "Very Heavy (2000-2500mAh)", "Extreme (2500-3000mAh)"))
+  )
+
+# View the grouped data
+head(device_usage_data)
+```
+
+
+# Numerical and Graphical Summaries
+
+### Contingency Tables
+
+Lets look at the distribution of some of our categorical variables.
+
+```{r}
+table(device_usage_data$Gender)
+table(device_usage_data$`Device Model`)
+table(device_usage_data$`Operating System`)
+table(device_usage_data$`User Behavior Class`)
+```
+
+For the one-way contingency table, I focused on the `User Behavior Class variable`, which serves as the primary grouping variable for this analysis. While I created additional grouping variables (`Age_Group`, `Screen_Time_Group`, `App_Usage_Group`, `Battery_Group`) during data processing, these were designed to have a distribution similar to the `User Behavior Class` variable.
+
+Since these grouping variables essentially mirror the distribution of the target variable, including their one-way tables would be redundant. Instead, I use `User Behavior Class` as the primary categorical variable for comparison in the two-way contingency tables below, examining how it relates to demographic factors like `Age`, `Gender`, `Device Model`, and `Operating System`. 
+
+```{r}
+# Behavior Class vs Age Group
+table(device_usage_data$`User Behavior Class`, device_usage_data$Age_Group)
+
+# Behavior Class vs Gender
+table(device_usage_data$`User Behavior Class`, device_usage_data$Gender)
+
+# Behavior Class vs Device Model
+table(device_usage_data$`User Behavior Class`, device_usage_data$`Device Model`)
+
+# Behavior Class vs Operating System
+table(device_usage_data$`User Behavior Class`, device_usage_data$`Operating System`)
+```
+
+
+### Numerical Summaries
+
+Now lets take a look at some five number summaries for quantitative variables at levels of `User Behavior Class` as well as `Gender`, `Device Model`, and `Operating System`.
+
+```{r}
+### KEY NUMERICAL SUMMARIES
+
+# Age across Behavior Class (shows age patterns by usage level)
+cat("Age by User Behavior Class:\n")
+tapply(device_usage_data$Age, device_usage_data$`User Behavior Class`, summary)
+
+# Screen Time across Behavior Class (validates the grouping)
+cat("Screen On Time by User Behavior Class:\n")
+tapply(device_usage_data$`Screen On Time (hours/day)`, 
+       device_usage_data$`User Behavior Class`, summary)
+
+# App Usage across Behavior Class (validates the grouping)
+cat("App Usage Time by User Behavior Class:\n")
+tapply(device_usage_data$`App Usage Time (min/day)`, 
+       device_usage_data$`User Behavior Class`, summary)
+
+# Battery Drain across Behavior Class (validates the grouping)
+cat("Battery Drain by User Behavior Class:\n")
+tapply(device_usage_data$`Battery Drain (mAh/day)`, 
+       device_usage_data$`User Behavior Class`, summary)
+
+# Screen Time across Gender (gender differences in usage)
+cat("Screen On Time by Gender:\n")
+tapply(device_usage_data$`Screen On Time (hours/day)`, 
+       device_usage_data$Gender, summary)
+
+# Screen Time across Device Model (device differences)
+cat("Screen On Time by Device Model:\n")
+tapply(device_usage_data$`Screen On Time (hours/day)`, 
+       device_usage_data$`Device Model`, summary)
+
+# Screen Time across Operating System (iOS vs Android)
+cat("Screen On Time by Operating System:\n")
+tapply(device_usage_data$`Screen On Time (hours/day)`, 
+       device_usage_data$`Operating System`, summary)
+```
+
