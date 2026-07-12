@@ -568,3 +568,41 @@ server <- function(input, output, session) {
       write.csv(filtered_data$data, file, row.names = FALSE)
     }
   )
+  
+  # contingency tables
+  
+  # One-way tables
+  output$oneway_table <- renderTable({
+    req(filtered_data$data)
+    data <- filtered_data$data
+    
+    # summary of one-way tables
+    data.frame(
+      Variable = c("Gender", "Device Model", "Operating System", 
+                   "User Behavior Class", "Age_Group", "Screen_Time_Group"),
+      Levels = c(
+        paste(names(table(data$Gender)), collapse = ", "),
+        paste(names(table(data$`Device Model`)), collapse = ", "),
+        paste(names(table(data$`Operating System`)), collapse = ", "),
+        paste(names(table(data$`User Behavior Class`)), collapse = ", "),
+        paste(names(table(data$Age_Group)), collapse = ", "),
+        paste(names(table(data$Screen_Time_Group)), collapse = ", ")
+      ),
+      Counts = c(
+        paste(table(data$Gender), collapse = ", "),
+        paste(table(data$`Device Model`), collapse = ", "),
+        paste(table(data$`Operating System`), collapse = ", "),
+        paste(table(data$`User Behavior Class`), collapse = ", "),
+        paste(table(data$Age_Group), collapse = ", "),
+        paste(table(data$Screen_Time_Group), collapse = ", ")
+      )
+    )
+  })
+  
+  # Two-way tables
+  output$twoway_table <- renderTable({
+    req(filtered_data$data)
+    data <- filtered_data$data
+    
+    table(data[[input$twoway_row]], data[[input$twoway_col]])
+  }, rownames = TRUE)
