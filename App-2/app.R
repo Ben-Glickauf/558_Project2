@@ -198,4 +198,69 @@ ui <- page_sidebar(
           )
         )
       )
-    )
+    ),
+    
+    # tab 2 -- data download
+    tabPanel(
+      title = "Data Download",
+      icon = icon("table"),
+      
+      card(
+        h4("Subsetted Data"),
+        p("This table shows the data after applying the filters from the sidebar."),
+        DTOutput("filtered_table") |> withSpinner(color = "#0dc5c1"),
+        br(),
+        downloadButton(
+          outputId = "download_data",
+          label = "Download Data (CSV)",
+          class = "btn-success",
+          icon = icon("download")
+        )
+      )
+    ),
+    
+    # tab 3 -- data exploration
+    tabPanel(
+      title = "Data Exploration",
+      icon = icon("chart-bar"),
+      
+      # Use tabsetPanel inside for subtabs
+      tabsetPanel(
+        
+        # contingency tables tab
+        tabPanel(
+          title = "Contingency Tables",
+          icon = icon("table"),
+          
+          layout_columns(
+            col_widths = c(6, 6),
+            
+            card(
+              h5("One-Way Tables"),
+              p("Distribution of categorical variables in the filtered data."),
+              tableOutput("oneway_table") |> withSpinner(color = "#0dc5c1")
+            ),
+            
+            card(
+              h5("Two-Way Table"),
+              p("Select variables to cross-tabulate."),
+              selectInput(
+                inputId = "twoway_row",
+                label = "Row Variable:",
+                choices = c("User Behavior Class", "Gender", "Device Model", 
+                            "Operating System", "Age_Group", "Screen_Time_Group",
+                            "App_Usage_Group", "Battery_Group"),
+                selected = "User Behavior Class"
+              ),
+              selectInput(
+                inputId = "twoway_col",
+                label = "Column Variable:",
+                choices = c("Age_Group", "Gender", "Device Model", 
+                            "Operating System", "User Behavior Class", "Screen_Time_Group",
+                            "App_Usage_Group", "Battery_Group"),
+                selected = "Age_Group"
+              ),
+              tableOutput("twoway_table") |> withSpinner(color = "#0dc5c1")
+            )
+          )
+        ),
