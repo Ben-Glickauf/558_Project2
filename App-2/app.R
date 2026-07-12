@@ -178,6 +178,24 @@ ui <- page_sidebar(
             tags$li(tags$b("Data Exploration:"), " Explore contingency tables, numerical summaries, 
                     and interactive plots.")
           )
+        ),
+        
+        # Image 
+        card(
+          img(src = "https://www.kaggle.com/static/images/site-logo.png", 
+              height = "100px", style = "display: block; margin: 0 auto;"),
+          br(),
+          p("Dataset from Kaggle", style = "text-align: center; font-style: italic;"),
+          br(),
+          div(
+            style = "background: #f0f8ff; padding: 15px; border-radius: 8px;",
+            h5("Dataset Summary", style = "text-align: center;"),
+            p(HTML(paste0(
+              "<b>Rows:</b> ", nrow(device_usage_data), "<br>",
+              "<b>Variables:</b> ", ncol(device_usage_data), "<br>",
+              "<b>Behavior Classes:</b> 1 (Light) to 5 (Extreme)"
+            )))
+          )
         )
       )
     )
