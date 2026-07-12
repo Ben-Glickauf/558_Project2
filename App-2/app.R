@@ -714,3 +714,72 @@ server <- function(input, output, session) {
     
     p
   })
+  
+  # Distribution plot
+  output$dist_plot <- renderPlot({
+    req(filtered_data$data)
+    data <- filtered_data$data
+    
+    dist_var_sym <- sym(input$dist_var)
+    
+    # Calculate the dynamic binwidth based on variable range
+    var_range <- diff(range(data[[input$dist_var]], na.rm = TRUE))
+    dynamic_binwidth <- max(var_range / 20, 0.5)  # 20 bins or at least 0.5
+    
+    if(input$dist_type == "hist") {
+      p <- ggplot(data, aes(x = !!dist_var_sym)) +
+        geom_histogram(binwidth = dynamic_binwidth, fill = "steelblue", 
+                       color = "white", alpha = 0.8) +
+        labs(title = paste("Histogram of", input$dist_var),
+             x = input$dist_var,
+             y = "Count")
+      
+      # Add faceting if checked
+      if(input$dist_facet) {
+        p <- p + facet_wrap(~`Device Model`, ncol = 3)
+      }
+      
+    } else if(input$dist_type == "density") {
+      p <- ggplot(data, aes(x = !!dist_var_sym)) +
+        geom_density(fill = "steelblue", alpha = 0.5) +
+        labs(title = paste("Density Plot of", input$dist_var),
+             x = input$dist_var,
+             y = "Density")
+      
+      # Add faceting if checked
+      if(input$dist_facet) {
+        p <- p + facet_wrap(~`Device Model`, ncol = 3)
+      }
+      
+    } else if(input$dist_type == "violin") {
+      # For violin, we need behavior class as x with fill
+      p <- ggplot(data, aes(x = as.factor(`User Behavior Class`), 
+                            y = !!dist_var_sym,
+                            fill = as.factor(`User Behavior Class`))) +
+        geom_violin(alpha = 0.6, trim = FALSE) +
+        geom_boxplot(width = 0.15, fill = "white", alpha = 0.8) +
+        scale_fill_brewer(palette = "RdYlBu", name = "Behavior Class") +
+        labs(title = paste("Distribution of", input$dist_var, "by Behavior Class"),
+             x = "User Behavior Class",
+             y = input$dist_var)
+      
+      # Add faceting if checked
+      if(input$dist_facet) {
+        p <- p + facet_wrap(~`Device Model`, ncol = 3)
+      }
+    }
+    
+    p <- p + theme_minimal()
+    
+    p
+  })
+  
+  # session info
+  observe({
+    cat("Mobile Device Usage Explorer app started.\n")
+    cat("Dataset contains", nrow(device_usage_data), "observations.\n")
+  })
+}
+
+# run the app
+shinyApp(ui = ui, server = server)
