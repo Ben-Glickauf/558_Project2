@@ -374,4 +374,96 @@ ui <- page_sidebar(
               plotOutput("box_plot", height = "400px") |> withSpinner(color = "#0dc5c1")
             )
           )
+        ),
+        
+        # scatter plots tab
+        tabPanel(
+          title = "Scatter Plots",
+          icon = icon("chart-line"),
+          
+          layout_columns(
+            col_widths = c(6, 6),
+            
+            card(
+              h5("Scatter Plot Settings"),
+              selectInput(
+                inputId = "scatter_x",
+                label = "X Variable:",
+                choices = c("App Usage Time (min/day)", "Screen On Time (hours/day)",
+                            "Age", "Battery Drain (mAh/day)", "Data Usage (MB/day)"),
+                selected = "App Usage Time (min/day)"
+              ),
+              selectInput(
+                inputId = "scatter_y",
+                label = "Y Variable:",
+                choices = c("Battery Drain (mAh/day)", "App Usage Time (min/day)",
+                            "Data Usage (MB/day)", "Screen On Time (hours/day)",
+                            "Age"),
+                selected = "Battery Drain (mAh/day)"
+              ),
+              checkboxInput(
+                inputId = "scatter_color",
+                label = "Color by User Behavior Class",
+                value = TRUE
+              ),
+              checkboxInput(
+                inputId = "scatter_regression",
+                label = "Show Regression Line",
+                value = FALSE
+              ),
+              checkboxInput(
+                inputId = "scatter_facet",
+                label = "Facet by Device Model",
+                value = FALSE
+              )
+            ),
+            
+            card(
+              h5("Scatter Plot"),
+              plotOutput("scatter_plot", height = "400px") |> withSpinner(color = "#0dc5c1")
+            )
+          )
+        ),
+        
+        # histograms and distribution plots
+        tabPanel(
+          title = "Distribution Plots",
+          icon = icon("chart-area"),
+          
+          layout_columns(
+            col_widths = c(6, 6),
+            
+            card(
+              h5("Distribution Plot Settings"),
+              selectInput(
+                inputId = "dist_var",
+                label = "Numeric Variable:",
+                choices = c("Screen On Time (hours/day)", "App Usage Time (min/day)",
+                            "Age", "Battery Drain (mAh/day)", "Data Usage (MB/day)"),
+                selected = "Screen On Time (hours/day)"
+              ),
+              selectInput(
+                inputId = "dist_type",
+                label = "Plot Type:",
+                choices = c("Histogram" = "hist", 
+                            "Density" = "density",
+                            "Violin + Box" = "violin"),
+                selected = "hist"
+              ),
+              checkboxInput(
+                inputId = "dist_facet",
+                label = "Facet by Device Model",
+                value = FALSE
+              )
+            ),
+            
+            card(
+              h5("Distribution Plot"),
+              plotOutput("dist_plot", height = "400px") |> withSpinner(color = "#0dc5c1")
+            )
+          )
         )
+      )
+    )
+  )
+)
