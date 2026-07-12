@@ -514,3 +514,29 @@ server <- function(input, output, session) {
       duration = 3
     )
   })
+  
+  # Screen On Time slider
+  output$screen_slider_ui <- renderUI({
+    sliderInput(
+      inputId = "screen_range",
+      label = NULL,
+      min = 0,
+      max = 12,
+      value = c(0, 12),
+      step = 0.5,
+      ticks = FALSE
+    )
+  })
+  
+  # Age slider
+  output$age_slider_ui <- renderUI({
+    sliderInput(
+      inputId = "age_range",
+      label = NULL,
+      min = 18,
+      max = 59,
+      value = c(18, 59),
+      step = 1,
+      ticks = FALSE
+    )
+  })
