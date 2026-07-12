@@ -606,3 +606,47 @@ server <- function(input, output, session) {
     
     table(data[[input$twoway_row]], data[[input$twoway_col]])
   }, rownames = TRUE)
+  
+  # numerical summaries
+  output$num_summary <- renderTable({
+    req(filtered_data$data)
+    data <- filtered_data$data
+    
+    # summary statistics with tidyverse
+    data |>
+      group_by(!!sym(input$group_var))  |>
+      summarise(
+        n = n(),
+        Mean = round(mean(!!sym(input$num_var), na.rm = TRUE), 2),
+        Median = round(median(!!sym(input$num_var), na.rm = TRUE), 2),
+        SD = round(sd(!!sym(input$num_var), na.rm = TRUE), 2),
+        Min = round(min(!!sym(input$num_var), na.rm = TRUE), 2),
+        Max = round(max(!!sym(input$num_var), na.rm = TRUE), 2)
+      )
+  })
+  
+  # bar charts
+  output$bar_plot <- renderPlot({
+    req(filtered_data$data)
+    data <- filtered_data$data
+    
+    bar_var_sym <- sym(input$bar_var)
+    
+    # create the plot
+    if(input$bar_fill) {
+      p <- ggplot(data, aes(x = !!bar_var_sym, 
+                            fill = as.factor(`User Behavior Class`))) +
+        geom_bar(position = "dodge") +
+        scale_fill_brewer(palette = "Blues", name = "Behavior Class")
+    } else {
+      p <- ggplot(data, aes(x = !!bar_var_sym)) +
+        geom_bar(fill = "steelblue", color = "white", alpha = 0.8)
+    }
+    
+    p <- p +
+      labs(title = paste("Distribution of", input$bar_var),
+           x = input$bar_var,
+           y = "Count") +
+      theme_minimal()
+    p
+  })
