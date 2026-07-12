@@ -119,6 +119,65 @@ ui <- page_sidebar(
     
     # numeric variable 2: Age
     h5("Age:"),
-    uiOutput("age_slider_ui")
-  )
-)
+    uiOutput("age_slider_ui"),
+    
+    hr(),
+    
+    # action button to apply filters
+    actionButton(
+      inputId = "apply_filters",
+      label = "Apply Filters",
+      icon = icon("filter"),
+      class = "btn-primary btn-block",
+      style = "width: 100%;"
+    ),
+    
+    hr(),
+    
+    p("Click 'Apply Filters' to update all tabs with the selected subset.",
+      style = "font-size: 0.8em; color: #888; font-style: italic;")
+  ),
+  
+  # Main panel with tabs
+  tabsetPanel(
+    
+    # tab 1 -- about tab
+    tabPanel(
+      title = "About",
+      icon = icon("info-circle"),
+      
+      layout_columns(
+        col_widths = c(8, 4),
+        
+        # app description
+        card(
+          h2("Mobile Device Usage Explorer"),
+          p("This Shiny app allows users to explore the Mobile Device Usage and User Behavior dataset."),
+          br(),
+          
+          h4("Purpose"),
+          p("The app provides an interactive interface to investigate patterns in mobile device usage, 
+            including app usage time, screen-on time, battery drain, and how these relate to user 
+            demographics and behavior classifications."),
+          br(),
+          
+          h4("Data Source"),
+          p("The dataset comes from Kaggle and contains 700 user records with 11 variables."),
+          p("Data Source:", 
+            a("Mobile Device Usage and User Behavior Dataset", 
+              href = "https://www.kaggle.com/datasets/valakhorasani/mobile-device-usage-and-user-behavior-dataset",
+              target = "_blank")),
+          br(),
+          
+          h4("How to Use This App"),
+          tags$ul(
+            tags$li(tags$b("Sidebar:"), " Use the filters to subset the data by device model, 
+                    operating system, screen time range, and age range."),
+            tags$li(tags$b("Apply Filters:"), " Click this button to update all tabs with your selected subset."),
+            tags$li(tags$b("Data Download:"), " View and download the (possibly subsetted) data."),
+            tags$li(tags$b("Data Exploration:"), " Explore contingency tables, numerical summaries, 
+                    and interactive plots.")
+          )
+        )
+      )
+    )
