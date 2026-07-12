@@ -303,4 +303,75 @@ ui <- page_sidebar(
             p("Summary statistics of the selected numeric variable across levels of the grouping variable."),
             tableOutput("num_summary") |> withSpinner(color = "#0dc5c1")
           )
+        ),
+        
+        # bar charts tab
+        tabPanel(
+          title = "Bar Charts",
+          icon = icon("chart-bar"),
+          
+          layout_columns(
+            col_widths = c(6, 6),
+            
+            card(
+              h5("Bar Chart Settings"),
+              selectInput(
+                inputId = "bar_var",
+                label = "Variable to Plot:",
+                choices = c("User Behavior Class", "Gender", "Device Model", 
+                            "Operating System", "Age_Group", "Screen_Time_Group",
+                            "App_Usage_Group", "Battery_Group"),
+                selected = "User Behavior Class"
+              ),
+              checkboxInput(
+                inputId = "bar_fill",
+                label = "Fill by User Behavior Class",
+                value = TRUE
+              )
+            ),
+            
+            card(
+              h5("Bar Chart"),
+              plotOutput("bar_plot", height = "400px") |> withSpinner(color = "#0dc5c1")
+            )
+          )
+        ),
+        
+        # box plots tab
+        tabPanel(
+          title = "Box Plots",
+          icon = icon("box"),
+          
+          layout_columns(
+            col_widths = c(6, 6),
+            
+            card(
+              h5("Box Plot Settings"),
+              selectInput(
+                inputId = "box_var",
+                label = "Numeric Variable:",
+                choices = c("Screen On Time (hours/day)", "App Usage Time (min/day)",
+                            "Age", "Battery Drain (mAh/day)", "Data Usage (MB/day)"),
+                selected = "Screen On Time (hours/day)"
+              ),
+              selectInput(
+                inputId = "box_group",
+                label = "Group By:",
+                choices = c("User Behavior Class", "Gender", "Device Model", 
+                            "Operating System", "Age_Group", "Screen_Time_Group",
+                            "App_Usage_Group", "Battery_Group"),
+                selected = "User Behavior Class"
+              ),
+              checkboxInput(
+                inputId = "box_facet",
+                label = "Facet by Device Model",
+                value = FALSE
+              )
+            ),
+            
+            card(
+              h5("Box Plot"),
+              plotOutput("box_plot", height = "400px") |> withSpinner(color = "#0dc5c1")
+            )
+          )
         )
