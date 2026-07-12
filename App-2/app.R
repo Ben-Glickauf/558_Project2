@@ -264,3 +264,43 @@ ui <- page_sidebar(
             )
           )
         ),
+        
+        # numerical summaries tab
+        tabPanel(
+          title = "Numerical Summaries",
+          icon = icon("calculator"),
+          
+          layout_columns(
+            col_widths = c(6, 6),
+            
+            card(
+              h5("Numeric Variable Selection"),
+              selectInput(
+                inputId = "num_var",
+                label = "Select Numeric Variable:",
+                choices = c("Age", "Screen On Time (hours/day)", 
+                            "App Usage Time (min/day)", "Battery Drain (mAh/day)",
+                            "Data Usage (MB/day)", "Number of Apps Installed"),
+                selected = "Screen On Time (hours/day)"
+              )
+            ),
+            
+            card(
+              h5("Categorical Variable for Grouping"),
+              selectInput(
+                inputId = "group_var",
+                label = "Group By:",
+                choices = c("User Behavior Class", "Gender", "Device Model", 
+                            "Operating System", "Age_Group", "Screen_Time_Group",
+                            "App_Usage_Group", "Battery_Group"),
+                selected = "User Behavior Class"
+              )
+            )
+          ),
+          
+          card(
+            h5("Summary Statistics"),
+            p("Summary statistics of the selected numeric variable across levels of the grouping variable."),
+            tableOutput("num_summary") |> withSpinner(color = "#0dc5c1")
+          )
+        )
