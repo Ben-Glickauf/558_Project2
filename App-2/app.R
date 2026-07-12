@@ -541,7 +541,6 @@ server <- function(input, output, session) {
     )
   })
   
-  # downloading the data
 # downloading the data
 output$filtered_table <- renderDT({
   req(filtered_data$data)
