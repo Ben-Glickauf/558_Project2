@@ -540,3 +540,31 @@ server <- function(input, output, session) {
       ticks = FALSE
     )
   })
+  
+  # downloading the data
+  output$filtered_table <- renderDT({
+    req(filtered_data$data)
+    
+    datatable(
+      filtered_data$data |>
+        select(`User ID`, `Device Model`, `Operating System`, 
+               `App Usage Time (min/day)`, `Screen On Time (hours/day)`,
+               `Battery Drain (mAh/day)`, `Data Usage (MB/day)`,
+               Age, Gender, `User Behavior Class`),
+      options = list(
+        pageLength = 10,
+        scrollX = TRUE,
+        dom = 'Bfrtip'
+      ),
+      rownames = FALSE
+    )
+  })
+  
+  output$download_data <- downloadHandler(
+    filename = function() {
+      paste0("device_usage_data_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      write.csv(filtered_data$data, file, row.names = FALSE)
+    }
+  )
