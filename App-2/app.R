@@ -467,3 +467,50 @@ ui <- page_sidebar(
     )
   )
 )
+
+
+
+# now lets define the server
+server <- function(input, output, session) {
+  
+  # include reactive value
+  filtered_data <- reactiveValues(data = device_usage_data)
+  
+  # observer for 'apply filters' button
+  observeEvent(input$apply_filters, {
+    
+    data_subset <- device_usage_data
+    
+    # define our data filters
+    
+    if(!"all" %in% input$device_filter) {
+      data_subset <- data_subset |>
+        filter(`Device Model` %in% input$device_filter)
+    }
+    
+    if(!"all" %in% input$os_filter) {
+      data_subset <- data_subset |>
+        filter(`Operating System` %in% input$os_filter)
+    }
+    
+    screen_min <- input$screen_range[1]
+    screen_max <- input$screen_range[2]
+    data_subset <- data_subset |>
+      filter(`Screen On Time (hours/day)` >= screen_min &
+               `Screen On Time (hours/day)` <= screen_max)
+    
+    age_min <- input$age_range[1]
+    age_max <- input$age_range[2]
+    data_subset <- data_subset |>
+      filter(Age >= age_min & Age <= age_max)
+    
+    # update the reactive value
+    filtered_data$data <- data_subset
+    
+    # show notification
+    showNotification(
+      paste("Data filtered:", nrow(data_subset), "rows remaining"),
+      type = "message",
+      duration = 3
+    )
+  })
