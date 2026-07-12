@@ -650,3 +650,67 @@ server <- function(input, output, session) {
       theme_minimal()
     p
   })
+  
+  # Box plot
+  output$box_plot <- renderPlot({
+    req(filtered_data$data)
+    data <- filtered_data$data
+    
+    box_var_sym <- sym(input$box_var)
+    box_group_sym <- sym(input$box_group)
+    
+    # Convert grouping variable to factors
+    p <- ggplot(data, aes(x = as.factor(!!box_group_sym), 
+                          y = !!box_var_sym,
+                          fill = as.factor(!!box_group_sym))) +
+      geom_boxplot() +
+      scale_fill_brewer(palette = "Blues") +
+      labs(title = paste(input$box_var, "by", input$box_group),
+           x = input$box_group,
+           y = input$box_var) +
+      theme_minimal()
+    
+    if(input$box_facet) {
+      p <- p + facet_wrap(~`Device Model`, ncol = 3)
+    }
+    
+    p
+  })
+  
+  # Scatter plots
+  output$scatter_plot <- renderPlot({
+    req(filtered_data$data)
+    data <- filtered_data$data
+    
+    scatter_x_sym <- sym(input$scatter_x)
+    scatter_y_sym <- sym(input$scatter_y)
+    
+    # Base plot without color
+    if(input$scatter_color) {
+      # Convert User Behavior Class to factor for discrete color scale
+      p <- ggplot(data, aes(x = !!scatter_x_sym, 
+                            y = !!scatter_y_sym, 
+                            color = as.factor(`User Behavior Class`))) +
+        geom_point(alpha = 0.7, size = 2) +
+        scale_color_brewer(palette = "Dark2", name = "Behavior Class")
+    } else {
+      p <- ggplot(data, aes(x = !!scatter_x_sym, y = !!scatter_y_sym)) +
+        geom_point(color = "steelblue", alpha = 0.6, size = 2)
+    }
+    
+    if(input$scatter_regression) {
+      p <- p + geom_smooth(method = "lm", se = TRUE, color = "red", alpha = 0.2)
+    }
+    
+    p <- p +
+      labs(title = paste(input$scatter_x, "vs", input$scatter_y),
+           x = input$scatter_x,
+           y = input$scatter_y) +
+      theme_minimal()
+    
+    if(input$scatter_facet) {
+      p <- p + facet_wrap(~`Device Model`, ncol = 3)
+    }
+    
+    p
+  })
