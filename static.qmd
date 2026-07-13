@@ -57,9 +57,9 @@ In order to get more meaningful results from our tables and charts in the next s
 
 ```{r}
 device_usage_data <- device_usage_data %>%
-  # Screen On Time Groups (hours) - Combined Very Heavy & Extreme
+  # Screen On Time groups
   mutate(
-    # Age Groups (5 levels)
+    # Age groups
     Age_Group = case_when(
       Age < 25   ~ "Young (18-24)",
       Age < 35   ~ "Young Adult (25-34)",
@@ -76,7 +76,7 @@ device_usage_data <- device_usage_data %>%
       `Screen On Time (hours/day)` >= 8       ~ "Very Heavy/Extreme (8-12h)"  # Combined!
     ),
     
-    # App Usage Time Groups (minutes)
+    # App Usage groups
     App_Usage_Group = case_when(
       `App Usage Time (min/day)` < 100        ~ "Very Light (0-100m)",
       `App Usage Time (min/day)` < 200        ~ "Light (100-200m)",
@@ -86,7 +86,7 @@ device_usage_data <- device_usage_data %>%
       `App Usage Time (min/day)` <= 600       ~ "Extreme (500-600m)"
     ),
     
-    # Battery Drain Groups (mAh)
+    # Battery Drain groups
     Battery_Group = case_when(
       `Battery Drain (mAh/day)` < 500         ~ "Very Low (0-500mAh)",
       `Battery Drain (mAh/day)` < 1000        ~ "Low (500-1000mAh)",
@@ -96,7 +96,7 @@ device_usage_data <- device_usage_data %>%
       `Battery Drain (mAh/day)` <= 3000       ~ "Extreme (2500-3000mAh)"
     ),
     
-    # Convert to ordered factors for better plotting
+    # Convert to factors for better plotting
     Age_Group = factor(Age_Group, 
                        levels = c("Young (18-24)", "Young Adult (25-34)", 
                                   "Middle Adult (35-44)", "Older Adult (45-54)", 
