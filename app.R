@@ -1,5 +1,3 @@
-# app.R
-# Mobile Device Usage Explorer
 # ST 558 Project - Shiny App
 
 library(shiny)
@@ -9,10 +7,10 @@ library(DT)
 library(shinythemes)
 library(shinycssloaders)  
 
-# Load and prepare data
+# read in the data
 device_usage_data <- read_csv("user_behavior_dataset.csv")
 
-# Create grouped variables
+# create grouped variables
 device_usage_data <- device_usage_data |>
   mutate(
     # Age groups 
@@ -51,7 +49,7 @@ device_usage_data <- device_usage_data |>
       `Battery Drain (mAh/day)` <= 3000       ~ "Very Heavy (2000-3000mAh)"
     ),
     
-    # Convert to factors
+    # convert to factors
     Age_Group = factor(Age_Group, 
                        levels = c("Young (18-24)", "Young Adult (25-34)", 
                                   "Middle Adult (35-44)", "Older Adult (45-54)", 
@@ -225,7 +223,6 @@ ui <- page_sidebar(
       title = "Data Exploration",
       icon = icon("chart-bar"),
       
-      # Use tabsetPanel inside for subtabs
       tabsetPanel(
         
         # contingency tables tab
@@ -482,8 +479,7 @@ server <- function(input, output, session) {
     
     data_subset <- device_usage_data
     
-    # define our data filters
-    
+    # define the data filters
     if(!"all" %in% input$device_filter) {
       data_subset <- data_subset |>
         filter(`Device Model` %in% input$device_filter)
@@ -505,15 +501,14 @@ server <- function(input, output, session) {
     data_subset <- data_subset |>
       filter(Age >= age_min & Age <= age_max)
     
-    # update the reactive value
+    # update reactive value
     filtered_data$data <- data_subset
     
     # show notification
     showNotification(
       paste("Data filtered:", nrow(data_subset), "rows remaining"),
       type = "message",
-      duration = 3
-    )
+      duration = 3)
   })
   
   # Screen On Time slider
@@ -525,8 +520,7 @@ server <- function(input, output, session) {
       max = 12,
       value = c(0, 12),
       step = 0.5,
-      ticks = FALSE
-    )
+      ticks = FALSE)
   })
   
   # Age slider
@@ -538,8 +532,7 @@ server <- function(input, output, session) {
       max = 59,
       value = c(18, 59),
       step = 1,
-      ticks = FALSE
-    )
+      ticks = FALSE)
   })
   
 # downloading the data
@@ -552,9 +545,8 @@ output$filtered_table <- renderDT({
              `App Usage Time (min/day)`, `Screen On Time (hours/day)`,
              `Battery Drain (mAh/day)`, `Data Usage (MB/day)`,
              Age, Gender, `User Behavior Class`),
-    options = list(pageLength = 10),  # Only pageLength from notes
-    rownames = FALSE                  # rownames from notes
-  )
+    options = list(pageLength = 10),
+    rownames = FALSE)
 })
   
   output$download_data <- downloadHandler(
@@ -609,7 +601,6 @@ output$filtered_table <- renderDT({
     req(filtered_data$data)
     data <- filtered_data$data
     
-    # summary statistics with tidyverse
     data |>
       group_by(!!sym(input$group_var))  |>
       summarise(
@@ -656,7 +647,6 @@ output$filtered_table <- renderDT({
     box_var_sym <- sym(input$box_var)
     box_group_sym <- sym(input$box_group)
     
-    # Convert grouping variable to factors
     p <- ggplot(data, aes(x = as.factor(!!box_group_sym), 
                           y = !!box_var_sym,
                           fill = as.factor(!!box_group_sym))) +
@@ -684,7 +674,6 @@ output$filtered_table <- renderDT({
     
     # Base plot without color
     if(input$scatter_color) {
-      # Convert User Behavior Class to factor for discrete color scale
       p <- ggplot(data, aes(x = !!scatter_x_sym, 
                             y = !!scatter_y_sym, 
                             color = as.factor(`User Behavior Class`))) +
@@ -719,7 +708,6 @@ output$filtered_table <- renderDT({
     
     dist_var_sym <- sym(input$dist_var)
     
-    # Calculate the dynamic binwidth based on variable range
     var_range <- diff(range(data[[input$dist_var]], na.rm = TRUE))
     dynamic_binwidth <- max(var_range / 20, 0.5)  # 20 bins or at least 0.5
     
@@ -731,7 +719,6 @@ output$filtered_table <- renderDT({
              x = input$dist_var,
              y = "Count")
       
-      # Add faceting if checked
       if(input$dist_facet) {
         p <- p + facet_wrap(~`Device Model`, ncol = 3)
       }
@@ -743,13 +730,11 @@ output$filtered_table <- renderDT({
              x = input$dist_var,
              y = "Density")
       
-      # Add faceting if checked
       if(input$dist_facet) {
         p <- p + facet_wrap(~`Device Model`, ncol = 3)
       }
       
     } else if(input$dist_type == "violin") {
-      # For violin, we need behavior class as x with fill
       p <- ggplot(data, aes(x = as.factor(`User Behavior Class`), 
                             y = !!dist_var_sym,
                             fill = as.factor(`User Behavior Class`))) +
@@ -760,23 +745,16 @@ output$filtered_table <- renderDT({
              x = "User Behavior Class",
              y = input$dist_var)
       
-      # Add faceting if checked
       if(input$dist_facet) {
         p <- p + facet_wrap(~`Device Model`, ncol = 3)
       }
     }
     
     p <- p + theme_minimal()
-    
     p
   })
   
-  # session info
-  observe({
-    cat("Mobile Device Usage Explorer app started.\n")
-    cat("Dataset contains", nrow(device_usage_data), "observations.\n")
-  })
 }
 
-# run the app
+# finally, lets run the app
 shinyApp(ui = ui, server = server)
