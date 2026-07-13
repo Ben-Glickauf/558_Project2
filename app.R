@@ -182,10 +182,11 @@ ui <- page_sidebar(
         
         # Image 
         card(
-          img(src = "https://www.kaggle.com/static/images/site-logo.png", 
-              height = "100px", style = "display: block; margin: 0 auto;"),
+          img(src = "best-mobile-apps-smartphones.jpg", 
+              height = "200px", 
+              style = "display: block; margin: 0 auto; border-radius: 8px;"),
           br(),
-          p("Dataset from Kaggle", style = "text-align: center; font-style: italic;"),
+          p("Mobile device usage data", style = "text-align: center; font-style: italic; color: #666;"),
           br(),
           div(
             style = "background: #f0f8ff; padding: 15px; border-radius: 8px;",
